@@ -1,0 +1,70 @@
+{
+  "name": "dsh-context-guard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "工具结果进上下文之前的最后一道压缩关卡：先识别内容类型再做结构化压缩，跨调用只给增量，超预算时按信息量取舍，全程自校验——有净收益才动手，绝不虚报省了多少。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "token",
+    "context",
+    "tool-result",
+    "compression",
+    "dedup"
+  ],
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./policy": "./lib/policy.js",
+    "./compact": "./lib/compact.js",
+    "./detect": "./lib/detect.js",
+    "./budget": "./lib/budget.js",
+    "./replay": "./lib/replay.js",
+    "./schema": "./lib/schema.js",
+    "./text": "./lib/text.js",
+    "./tokens": "./lib/tokens.js",
+    "./units": "./lib/units.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml"
+  },
+  "files": [
+    "lib",
+    "test",
+    "tools",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "bench": "node tools/bench.mjs",
+    "bench:json": "node tools/bench.mjs --json"
+  },
+  "engines": {
+    "node": "^22.19 || >=24"
+  },
+  "meta": {
+    "title": "输出前压缩 Context Guard",
+    "description": "工具结果进上下文之前再做一次极致压缩：类型感知的结构化压缩 + 跨调用增量 + 预算内按信息量取舍；有净收益才动手，标记里的行数经自校验。"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@deepseek-ai/dsh": "^0.2.0-rc.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh": {
+      "optional": true
+    }
+  }
+}
