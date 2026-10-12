@@ -191,6 +191,21 @@ pnpm install
 `univer` 10000、`grep`/`web_search` 8000、`glob`/`list` 6000。
 `read` / `write` / `edit` 属于"高风险内容"，只做规范化 + 去重 + 预算，不做任何结构改写。
 
+### 装载与运行留痕
+
+插件会往 `<DSH_HOME>/context-guard.trace.jsonl` 追加两种记录（只记事实，**不记任何结果内容**）：
+
+```json
+{"event":"apply","postExecuteListener":true,"webServer":"registerable","config":{...}}
+{"event":"optimized","tool":"bash","steps":["normalize","log-fold"],"charsBefore":14292,"charsAfter":85,"tokensSaved":3551}
+```
+
+`event: apply` 出现就说明插件被装载了；`webServer` 字段说明统计端点能不能挂上。写失败一律静默。
+
+**为什么要有这个**：Electron 宿主把插件的 stderr 吞掉了，界面上也不显示装载失败。排查"插件到底有没有被装载"时，
+`dsh --profile <profile> headless "任意一句话"` 是唯一能把 `dsh: warning: N entry did not activate` 加完整堆栈
+打到终端上的办法；trace 文件则是在桌面端也能看的第二只眼睛。
+
 ### 只读诊断端点
 
 装了 `webServer` 时会挂一个 `/dsh-context-guard/stats`，回 JSON：看了多少条结果、改了多少条、
