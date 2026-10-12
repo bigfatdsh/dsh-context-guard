@@ -1,0 +1,36 @@
+# dsh-context-guard —— 输出前压缩 · DSH bundle 补丁。
+#
+# 只插入一行：把插件挂到 Host 根部。
+#
+# 为什么挂在根部就够：
+#   `tools/post-execute` 是**带作用域**的事件，由 `ToolRuntime` 用 `scopeTarget(this, exec.agent)`
+#   派发。作用域事件的路由规则是"无标签监听器放行，有标签监听器只在标签是分发键或其祖先时
+#   放行"，因此根上这一个不带标签的监听器会收到**所有** agent、所有会话、所有嵌套子调用的
+#   结果。不需要按 agent 各注册一份，也就不会随 agent 数量增长。
+#
+# 配置项（都可省略）：
+#   enabled          true    总开关。关掉后监听器立刻变直通，不产生任何额外 token。
+#   budgetChars      12000   单结果字符预算兜底值；按工具名另有默认（见 lib/policy.js）。
+#   toolBudgets      {}      按工具覆盖预算，例如 { bash: 4000 }。
+#   minChars         400     小于这个字符数的结果完全不处理。
+#   minSavingRatio   0.12    省不到这个比例就不改。
+#   incremental      delta   跨调用增量：off / identical / delta。
+#   skipTools        []      不处理的工具名。
+#   conservative     false   只做无损规范化，不做结构改写（排错用）。
+#   compressErrors   false   报错结果也压缩？默认关：报错上下文最贵。
+#   log              false   打印每次压缩的明细。
+#
+# 这些值只是起点：直接在下面改，或用 profile 层的 patch 覆盖整块 config。
+
+- insert:
+    - id: context-guard
+      name: 'dsh-context-guard'
+      config:
+        enabled: true
+        budgetChars: 12000
+        minChars: 400
+        minSavingRatio: 0.12
+        incremental: delta
+        conservative: false
+        compressErrors: false
+        log: false
