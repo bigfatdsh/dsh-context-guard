@@ -1,0 +1,4 @@
+/Users/yangletian/Documents/deepseek-harness/default-workspace/dsh-tool-token-optimizer/lib/index.js:15: * - 本插件只挂在 `tools/post-execute`，改的是尚未进入请求的那一条结果；
+/Users/yangletian/Documents/deepseek-harness/default-workspace/dsh-tool-token-optimizer/lib/index.js:21: * `tools/post-execute` 由 `ToolRuntime` 用 **agent 作用域**派发
+/Users/yangletian/Documents/deepseek-harness/default-workspace/dsh-tool-token-optimizer/lib/index.js:230:  ctx.on('tools/post-execute', handler, { prepend: true });
+/Users/yangletian/Documents/deepseek-harness/default-workspace/dsh-tool-token-optimizer/lib/index.js:291:   * 2) 每个 agent 自己的作用域——这才是 `tools/post-execute` 真正派发的地方。
