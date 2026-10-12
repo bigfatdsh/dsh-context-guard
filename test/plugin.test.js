@@ -13,7 +13,7 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 
-import { apply, createHandler, name, Stats } from '../lib/index.js'
+import { apply, Config, createHandler, name, Stats } from '../lib/index.js'
 import { resolveConfig } from '../lib/schema.js'
 
 /** 最小 Cordis 上下文替身。 */
@@ -255,4 +255,23 @@ test('统计快照可序列化', () => {
 
 test('插件名固定', () => {
   assert.equal(name, 'context-guard')
+})
+
+test('Config 必须是 Standard Schema（宿主装载期直接读它）', () => {
+  // Cordis 的 resolveConfig 读的是 `runtime.Config['~standard'].validate(config)`。
+  // 早期版本把 Config 导成"字段表"，宿主读到 undefined 后抛
+  // `Cannot read properties of undefined (reading 'validate')`，插件静默不激活。
+  const standard = Config['~standard']
+  assert.equal(typeof standard, 'object')
+  assert.equal(typeof standard.validate, 'function')
+  const result = standard.validate({ enabled: true })
+  assert.equal('then' in result, false, '校验必须同步返回')
+  assert.equal(result.issues, undefined)
+  assert.equal(result.value.enabled, true)
+})
+
+test('Config 对未知键返回 issues（宿主会抛 ValidationError）', () => {
+  const result = Config['~standard'].validate({ enable: true })
+  assert.ok(Array.isArray(result.issues))
+  assert.match(result.issues[0].message, /unknown configuration key/)
 })
