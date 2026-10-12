@@ -4,6 +4,26 @@
 
 首个版本。目标是"输出前把工具结果压到极致，同时一条信息都不丢"。
 
+### 统计端点为什么挂不上（两次真机定位）
+
+桌面端插件明明在压缩（留痕里有 `optimized` 记录），端点却一直 404。两个原因叠在一起：
+
+1. **冷启动时 `webServer` 还不存在**。宿主按行装载，本插件的行可能排在 webserver 行前面，
+   那一刻 `ctx.get('webServer')` 是 undefined（留痕里 `webServer: "absent"`）。判 undefined
+   就放弃的话，端点永远挂不上。
+2. **`apply` 会被调用多次**（多个 app 层各挂一遍，实测三次）。webserver 对重复路径直接抛
+   `duplicate exact route`，未捕获的抛错会把整个 effect 回滚——最先注册成功的那条路由被
+   后两次失败一起带走。
+
+修法：`ctx.get()` 立刻试一次 + `ctx.inject(['webServer'], cb)` 事件兜底 + 有限次定时重试
+（250ms × 30s，成功即停，定时器 `unref()`）；注册幂等（进程内一次性 + try/catch，重复注册
+按"已经在"处理，绝不抛）。三条路汇聚到同一个 `tryMount()`，每次尝试都写留痕。
+
+### 装载留痕
+
+`<DSH_HOME>/context-guard.trace.jsonl` 追加 `apply` 与 `optimized` 两类记录（只记事实，不记结果内容）。
+Electron 宿主吞掉插件 stderr，这是桌面端唯一能确认"插件到底有没有被装载"的证据。
+
 ### 做了什么
 
 - **挂在 `tools/post-execute`**（宿主公开契约），根上注册一次即覆盖所有 agent 与会话：
