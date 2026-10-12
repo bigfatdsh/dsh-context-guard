@@ -12,8 +12,8 @@
 #   enabled          true    总开关。关掉后监听器立刻变直通，不产生任何额外 token。
 #   budgetChars      12000   单结果字符预算兜底值；按工具名另有默认（见 lib/policy.js）。
 #   toolBudgets      {}      按工具覆盖预算，例如 { bash: 4000 }。
-#   minChars         400     小于这个字符数的结果完全不处理。
-#   minSavingRatio   0.12    省不到这个比例就不改。
+#   minChars         200     小于这个字符数的结果完全不处理。
+#   minSavingRatio   0.03    省不到这个比例就不改。
 #   incremental      delta   跨调用增量：off / identical / delta。
 #   skipTools        []      不处理的工具名。
 #   conservative     false   只做无损规范化，不做结构改写（排错用）。
@@ -28,8 +28,8 @@
       config:
         enabled: true
         budgetChars: 12000
-        minChars: 400
-        minSavingRatio: 0.12
+        minChars: 200
+        minSavingRatio: 0.03
         incremental: delta
         conservative: false
         compressErrors: false
