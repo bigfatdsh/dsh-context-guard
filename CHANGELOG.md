@@ -26,7 +26,22 @@
 
 ### 修过的坑（都留了注释，避免回归）
 
-1. **`~/.dsh` 里挂"包住模型调用"的钩子会让宿主内存暴涨**（历史教训）。本插件只用一个
+1. **`Config` 的导出形状错了，插件静默不激活**（最贵的一个坑）。
+   Cordis 的 `resolveConfig(runtime, config)` 读的是
+   `runtime.Config['~standard'].validate(config)` —— 也就是导出的 `Config` **本身**必须
+   是 Standard Schema 对象。最初把 `Config` 导成了"字段表"（`{ enabled: Field, ... }`），
+   宿主读到 `Field['~standard'] === undefined` 后抛
+   `TypeError: Cannot read properties of undefined (reading 'validate')`：插件整条不激活、
+   统计端点 404，而界面上**什么都不显示**。定位方法是拿一个只剩 `@deepseek-ai/dsh-base`
+   和 `dsh-web-app` 的干净 profile 跑 `dsh --profile web --port 0 --no-open`，
+   宿主会在 stderr 上打 `dsh: warning: 1 entry did not activate` 加完整堆栈。
+   现在 `test/plugin.test.js` 有两条用例直接钉这个形状。
+2. **插件必须登记成 profile 的 bundle 才会被装载**。
+   只往 profile 的 `package.json` 加依赖、并在 `cordis.patch.yml` 里写 `- insert:` 是**不够**的：
+   只有列进 `dsh.profile.bundles` 的包，它自带的 `cordis.patch.yml`（`dsh.bundle.patch`）
+   才会被合并成一层。插件自带的 patch 负责"插进树里"，profile 层按 `id` 覆盖负责"配成要的值"
+   （profile 层的 `config` 是整块替换语义，每个键都要写全）。
+3. **`~/.dsh` 里挂"包住模型调用"的钩子会让宿主内存暴涨**（历史教训）。本插件只用一个
    轻量的 per-result 监听器，不做任何模型路径包装。
 2. **标记里的行数会虚报**。早期版本靠"标记之间的行距"倒推覆盖了多少行，遇到嵌套折叠
    （diff 折过的区域又被重复行折叠）和相邻标记时必然算错。改成每个单位自带行数。
@@ -40,5 +55,8 @@
 6. **diff 的文件头顺序**：增删计数必须在 hunk 之前结算，否则头行会跑到 hunk 后面。
 7. **`\ No newline at end of file` 折进上一行时忘了记账**：文本折了，行数也要加上，
    否则总量校验失败。
+8. **`minChars` / `minSavingRatio` 传了但没人用**：两个选项当初只在增量层被读到，压缩层
+   完全忽略。现在两个闸门都落在 `optimizeContent` 里（不依赖调用方），并且净收益比例按
+   **文本部分**算——把图片等富内容算进分母会让"文本省了一半"看起来像"整体只省了一点"。
 ```
 
