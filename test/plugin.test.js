@@ -13,46 +13,65 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 
-import { apply, Config, createHandler, name, Stats } from '../lib/index.js'
+import { apply, Config, createHandler, name, resetStatsEndpointFlag, Stats, STATS_PATH } from '../lib/index.js'
 import { resolveConfig } from '../lib/schema.js'
 
-/** 最小 Cordis 上下文替身。 */
-function fakeCtx() {
+/**
+ * 最小 Cordis 上下文替身。
+ *
+ * @param options - `{ noWebServer }`：初始模拟"冷启动时 webServer 还不存在"。
+ * @returns `{ ctx, listeners, effects, warnings }`。
+ */
+function fakeCtx(options = {}) {
   const listeners = []
   const effects = []
   const warnings = []
-  return {
-    listeners,
-    effects,
-    warnings,
-    ctx: {
-      on(event, handler, options) {
-        listeners.push({ event, handler, options })
-        return () => {}
-      },
-      effect(setup, label) {
-        effects.push(label)
-        return setup()
-      },
-      get(key) {
-        if (key === 'webServer') {
-          return {
-            register(spec) {
-              listeners.push({ event: 'http', handler: spec.handler, options: spec })
-              return () => {}
-            },
-          }
-        }
-        return undefined
-      },
-      logger: {
-        info() {},
-        warn(message) {
-          warnings.push(message)
-        },
+  const webServer = () => ({
+    register(spec) {
+      if (listeners.some((entry) => entry.event === 'http' && entry.options.path === spec.path)) {
+        throw new Error(`webserver: duplicate exact route "${spec.path}"`)
+      }
+      listeners.push({ event: 'http', handler: spec.handler, options: spec })
+      return () => {}
+    },
+  })
+
+  const ctx = {
+    /** 测试开关：true = 服务还没出现；改回 false = 服务后来就绪。 */
+    __noWebServer: options.noWebServer === true,
+    on(event, handler, opts) {
+      listeners.push({ event, handler, options: opts })
+      return () => {}
+    },
+    effect(setup, label) {
+      effects.push(label)
+      return setup()
+    },
+    get(key) {
+      if (key !== 'webServer') return undefined
+      return ctx.__noWebServer === true ? undefined : webServer()
+    },
+    /**
+     * 宿主的 inject 语义：服务已就绪则立刻回调，否则等服务出现。
+     * 替身里只在服务可用时立刻回调（这正是真机上的关键差异所在）。
+     *
+     * @param deps - 依赖名。
+     * @param callback - 就绪回调。
+     * @returns 无。
+     */
+    inject(deps, callback) {
+      if (!deps.includes('webServer')) return
+      if (ctx.__noWebServer === true) return
+      callback(webServer())
+    },
+    logger: {
+      info() {},
+      warn(message) {
+        warnings.push(message)
       },
     },
   }
+  return { ctx, listeners, effects, warnings }
 }
 
 /** 造一个只含字母、逐行不同的词，用来躲开"数字被模板抹平"的折叠。 */
@@ -83,6 +102,7 @@ const bigJson = JSON.stringify(
 )
 
 test('apply 把处理器挂在 tools/post-execute 上并 prepend', () => {
+  resetStatsEndpointFlag()
   const { ctx, listeners, effects } = fakeCtx()
   apply(ctx, {})
   const listener = listeners.find((entry) => entry.event === 'tools/post-execute')
@@ -92,12 +112,34 @@ test('apply 把处理器挂在 tools/post-execute 上并 prepend', () => {
 })
 
 test('apply 注册只读统计端点', () => {
+  resetStatsEndpointFlag()
   const { ctx, listeners } = fakeCtx()
   apply(ctx, {})
   const http = listeners.find((entry) => entry.event === 'http')
   assert.ok(http !== undefined)
-  assert.equal(http.options.path, '/dsh-context-guard/stats')
+  assert.equal(http.options.path, STATS_PATH)
   assert.equal(http.options.kind, 'exact')
+})
+
+test('apply 被调用多次时端点只注册一次（重复路径会让 webserver 抛错）', () => {
+  resetStatsEndpointFlag()
+  const { ctx, listeners } = fakeCtx()
+  apply(ctx, {})
+  apply(ctx, {})
+  apply(ctx, {})
+  assert.equal(listeners.filter((entry) => entry.event === 'http').length, 1)
+})
+
+test('冷启动时 webServer 还没出现也不抛错，端点等它就绪', async () => {
+  resetStatsEndpointFlag()
+  const { ctx, listeners } = fakeCtx({ noWebServer: true })
+  apply(ctx, {})
+  assert.equal(listeners.filter((entry) => entry.event === 'http').length, 0)
+  // 定时重试窗口内服务出现 → 自动挂上，不需要重启。
+  ctx.__noWebServer = false
+  await new Promise((resolve) => setTimeout(resolve, 400))
+  assert.equal(listeners.filter((entry) => entry.event === 'http').length, 1)
+  resetStatsEndpointFlag()
 })
 
 test('开关关闭时一个字都不动', async () => {
