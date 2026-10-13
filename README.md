@@ -1,6 +1,6 @@
 # dsh元优化插件
 
-> 包名是 `dsh-context-guard`（npm 不允许中文包名）；面板与文档里显示为 **dsh元优化插件**。
+> 包名是 `dsh-meta-optimizer`（npm 不允许中文包名）；面板与文档里显示为 **dsh元优化插件**。
 
 **输出前压缩**：工具结果在写进上下文**之前**再过一道压缩关卡。类型感知的结构化压缩 +
 跨调用增量 + 预算内按信息量取舍，每一步都可解释、可关闭，而且**只有真省了才动手**。
@@ -179,7 +179,7 @@ node tools/gate.mjs              # 净收益门槛扫描
 # 1) 把插件加进 profile 的依赖（用 link: 指向本仓库目录）
 cd <DSH_HOME>/profiles/<profile名>
 #    在 package.json 的 dependencies 里加一行：
-#      "dsh-context-guard": "link:/绝对路径/dsh-context-guard"
+#      "dsh-meta-optimizer": "link:/绝对路径/dsh-meta-optimizer"
 pnpm install
 
 # 2) 重启该 profile（DSH Desktop 需要重启应用；profile 的插件行在启动时装载）
@@ -191,7 +191,7 @@ pnpm install
 ```yaml
 - insert:
     - id: context-guard
-      name: 'dsh-context-guard'
+      name: 'dsh-meta-optimizer'
       config:
         enabled: true
         incremental: delta
@@ -254,7 +254,7 @@ pnpm install
 
 ### 只读诊断端点
 
-装了 `webServer` 时会挂一个 `/dsh-context-guard/stats`，回 JSON：看了多少条结果、改了多少条、
+装了 `webServer` 时会挂一个 `/dsh-meta-optimizer/stats`，回 JSON：看了多少条结果、改了多少条、
 增量命中多少次、回滚多少次、累计省了多少估算 token、各步骤与各类型的命中次数。不返回任何
 结果内容。
 
