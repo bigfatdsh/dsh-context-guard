@@ -27,10 +27,22 @@
       name: 'dsh-context-guard'
       config:
         enabled: true
-        budgetChars: 12000
+        budgetTokens: 1500
+        toolBudgets: {}
         minChars: 200
         minSavingRatio: 0.03
+        keepRatio: 0.45
+        minKeepTokens: 200
         incremental: delta
+        incrementalMinChars: 600
+        memoryEntries: 64
+        repeatRun: 3
+        repeatMinLength: 24
+        repeatMinSaved: 64
+        diffContext: 3
+        maxBlankRun: 1
+        jsonIndent: 0
         conservative: false
         compressErrors: false
+        skipTools: []
         log: false
