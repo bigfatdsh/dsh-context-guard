@@ -3,7 +3,7 @@
  *
  * 每个用例都是一种**真实工具输出的样子**，识别错就会用错刀，所以这里只放有代表性的形状。
  *
- * @module dsh-context-guard/test/detect
+ * @module dsh-meta-optimizer/test/detect
  */
 
 import { strict as assert } from 'node:assert'
