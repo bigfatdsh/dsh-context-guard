@@ -223,7 +223,9 @@ async function main() {
       .join('\n')
     const report = markerReport(mineText)
     const goneLines = text.split('\n').length - mineText.split('\n').length
-    if (report.lines > goneLines) overClaim += 1
+    // goneLines < 0 = 结果行数**变多**（超长行被拆成多行）。那是合法省略标记换来的，
+    // 一行都没丢，不存在"虚报"的可能。早期漏了这个判断，把 24 条正常结果误报成虚报。
+    if (goneLines >= 0 && report.lines > goneLines) overClaim += 1
     if (signalCoverage(signals, mineText).missing > 0) signalLost += 1
 
     // 对照插件
