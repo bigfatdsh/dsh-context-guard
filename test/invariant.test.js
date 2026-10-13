@@ -6,7 +6,7 @@
  *
  * 这里直接跑 `tools/corpus.mjs` 的全套语料（含真实抓取的输出），逐条核对。
  *
- * @module dsh-context-guard/test/invariant
+ * @module dsh-meta-optimizer/test/invariant
  */
 
 import { strict as assert } from 'node:assert'
