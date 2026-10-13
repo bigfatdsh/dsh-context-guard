@@ -5,7 +5,7 @@
  * 1. **永远不会变大**（省不下来就原样返回）；
  * 2. **高信息量的行不会被丢**（报错、路径、断言必须活下来）。
  *
- * @module dsh-context-guard/test/policy
+ * @module dsh-meta-optimizer/test/policy
  */
 
 import { strict as assert } from 'node:assert'
