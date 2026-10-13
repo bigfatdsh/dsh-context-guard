@@ -7,7 +7,7 @@
  * 2. 该透传的一律透传（报错、富内容、黑名单、太短、关开关）；
  * 3. 该动手时结果确实变小，且**净收益为负时回滚**。
  *
- * @module dsh-context-guard/test/plugin
+ * @module dsh-meta-optimizer/test/plugin
  */
 
 import { strict as assert } from 'node:assert'
