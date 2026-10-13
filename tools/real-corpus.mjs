@@ -14,7 +14,7 @@
  *
  * 并且逐条核对不变量：绝不放大、绝不虚报省略行数、高信息量行必须有交代。
  *
- * @module dsh-context-guard/tools/real-corpus
+ * @module dsh-meta-optimizer/tools/real-corpus
  */
 
 import { createRequire } from 'node:module'
