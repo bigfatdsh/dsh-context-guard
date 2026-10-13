@@ -83,7 +83,8 @@ const report = { sections: {} }
     const outText = textOf(r.content)
     const rep = markerReport(outText)
     const gone = text.split('\n').length - outText.split('\n').length
-    if (rep.lines > gone) overClaim++
+    // gone < 0 = 行数变多（超长行被拆开），不是虚报。
+    if (gone >= 0 && rep.lines > gone) overClaim++
     const have = index(outText)
     let missing = 0
     for (const line of text.split('\n')) {
