@@ -1,7 +1,7 @@
 /**
  * 文本层的单元测试。
  *
- * @module dsh-context-guard/test/text
+ * @module dsh-meta-optimizer/test/text
  */
 
 import { strict as assert } from 'node:assert'
