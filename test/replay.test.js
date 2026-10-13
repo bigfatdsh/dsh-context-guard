@@ -3,7 +3,7 @@
  *
  * 这一层要证明的是"同一次调用看第二遍时只给变化"，以及**变化很大时不硬做增量**。
  *
- * @module dsh-context-guard/test/replay
+ * @module dsh-meta-optimizer/test/replay
  */
 
 import { strict as assert } from 'node:assert'
