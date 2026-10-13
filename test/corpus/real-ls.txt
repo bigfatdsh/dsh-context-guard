@@ -26,7 +26,7 @@ drwxr-xr-x@ 17 yangletian  staff       544 Oct  6 14:19 dangzhi-check
 drwxr-xr-x@ 12 yangletian  staff       384 Oct  6 20:40 dsh-auto-effort
 drwxr-xr-x@ 13 yangletian  staff       416 Oct  2 21:50 dsh-computer-use-turbo
 drwxr-xr-x@ 11 yangletian  staff       352 Oct  3 19:49 dsh-concise-output
-drwxr-xr-x@  6 yangletian  staff       192 Oct 12 21:02 dsh-context-guard
+drwxr-xr-x@  6 yangletian  staff       192 Oct 12 21:02 dsh-meta-optimizer
 -rw-r--r--@  1 yangletian  staff   1007011 Oct 12 18:51 dsh-ops-0.2.9.tgz
 -rw-r--r--@  1 yangletian  staff  20859568 Oct  1 09:32 dsh-orb-0.0.0.tgz
 drwxr-xr-x@ 13 yangletian  staff       416 Oct 12 19:11 dsh-plugin-dev-notes
