@@ -40,8 +40,10 @@ const lines = (text) => text.split('\n')
 
 test('foldRuns 折叠连续重复行', () => {
   const input = u(['a', 'same', 'same', 'same', 'same', 'b'])
+  // 保留 1 个样本（内容相同，去重后只留 1 个），其余 3 行折成标记。
+  // 4 行 `same` 内容完全相同 → 去重后只保留 1 个样本，其余 3 行折成标记。
   const out = foldRuns(input, { minRun: 3 })
-  assert.deepEqual(settle(out), ['a', 'same', '… \u00d74 (same line repeated)', 'b'])
+  assert.deepEqual(settle(out), ['a', 'same', '… \u00d73 (same line repeated)', 'b'])
   // 被折掉的 3 行必须记在标记上：单位里的行数之和守恒。
   assert.equal(out.reduce((sum, entry) => sum + entry.lines, 0), input.length)
 })
@@ -59,7 +61,10 @@ test('foldRuns 严格模式只合"日志事件"，不碰只差数字的报表行
     '2026-01-01 10:00:02 INFO retry attempt 3',
     '2026-01-01 10:00:03 INFO retry attempt 4',
   ])
-  assert.equal(settle(foldRuns(events, { minRun: 3, strict: true })).length, 2)
+  // 4 个只差数字的日志事件：保留前 3 个变体（各自是真实的行），第 4 个折成标记 → 4 条。
+  const folded = settle(foldRuns(events, { minRun: 3, strict: true }))
+  assert.equal(folded.length, 4)
+  assert.match(folded[3], /×1 \(same line repeated\)/)
 
   // 报表行：只差数字但没有日志特征 → 一行都不许折
   const report = ['预算 1500 省 9.8% 丢失 1/2596 中位数 928', '预算 2000 省 9.8% 丢失 1/2596 中位数 928', '预算 4000 省 9.8% 丢失 1/2596 中位数 928']
@@ -191,11 +196,14 @@ test('compactLog 折叠同一模板的重复事件', () => {
   )
   const out = compactLog(u(input))
   const settled = settle(out)
-  assert.equal(settled.length, 2)
-  assert.match(settled[0], /×4 \(same event repeated; last: 4\)/)
-  assert.equal(settled[1], '2026-01-01 10:00:04 INFO gave up')
-  // 整段重复（含首行）都由标记代表，因此标记必须声明 4 行。
-  assert.equal(out[0].lines, 4)
+  // 前 4 行里保留前 3 个内容不同的行（变体样本），只有第 4 行被折；
+  // 第 5 行 `gave up` 模板不同 → 不属于这一段，原样留下。
+  assert.equal(settled.length, 5)
+  assert.match(settled[3], /×1 \(same event repeated; last: 4\)/)
+  assert.equal(settled[4], '2026-01-01 10:00:04 INFO gave up')
+  // `lines` 只数**被折掉的那些行**；前 3 个样本是真实保留的行，各自算 0。
+  // 4 行里折掉 1 行，所以首行算 1 行、总账仍然守恒（4 = 1 + 0 + 0 + 1 + 第 5 行）。
+  assert.equal(out[0].lines, 1)
 })
 
 test('compactBuild 只折进度行', () => {
