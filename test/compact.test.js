@@ -51,10 +51,19 @@ test('foldRuns 不碰只有两行的重复', () => {
   assert.deepEqual(settle(foldRuns(u(input), { minRun: 3 })), input)
 })
 
-test('foldRuns 严格模式合并只有数字不同的行', () => {
-  const input = u(['retry 1', 'retry 2', 'retry 3', 'retry 4'])
-  const out = foldRuns(input, { minRun: 3, strict: true })
-  assert.equal(settle(out).length, 2)
+test('foldRuns 严格模式只合"日志事件"，不碰只差数字的报表行', () => {
+  // 日志事件：有时间戳，只差数字 → 折
+  const events = u([
+    '2026-01-01 10:00:00 INFO retry attempt 1',
+    '2026-01-01 10:00:01 INFO retry attempt 2',
+    '2026-01-01 10:00:02 INFO retry attempt 3',
+    '2026-01-01 10:00:03 INFO retry attempt 4',
+  ])
+  assert.equal(settle(foldRuns(events, { minRun: 3, strict: true })).length, 2)
+
+  // 报表行：只差数字但没有日志特征 → 一行都不许折
+  const report = ['预算 1500 省 9.8% 丢失 1/2596 中位数 928', '预算 2000 省 9.8% 丢失 1/2596 中位数 928', '预算 4000 省 9.8% 丢失 1/2596 中位数 928']
+  assert.deepEqual(settle(foldRuns(u(report), { minRun: 3, strict: true })), report)
 })
 
 test('templateOf 抹掉数字与长十六进制', () => {
@@ -163,6 +172,11 @@ test('compactDiff 大段未变内容只留一句说明', () => {
   assert.ok(text.includes('+added'))
   assert.ok(text.includes('57 lines unchanged context'))
   assert.ok(text.split('\n').length < 12)
+})
+
+test('compactLog 只折日志事件，不折报表行', () => {
+  const report = ['预算 1500 省 9.8% 丢失 1/2596', '预算 2000 省 9.8% 丢失 1/2596', '预算 4000 省 9.8% 丢失 1/2596']
+  assert.deepEqual(settle(compactLog(u(report))), report)
 })
 
 test('compactLog 折叠同一模板的重复事件', () => {
