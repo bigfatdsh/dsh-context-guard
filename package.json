@@ -1,6 +1,6 @@
 {
   "name": "dsh-context-guard",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -42,7 +42,8 @@
     "test": "node --test \"test/*.test.js\"",
     "bench": "node tools/bench.mjs",
     "bench:json": "node tools/bench.mjs --json",
-    "bench:real": "node tools/real-corpus.mjs"
+    "bench:real": "node tools/real-corpus.mjs",
+    "eval": "node tools/evaluate.mjs"
   },
   "engines": {
     "node": "^22.19 || >=24"
