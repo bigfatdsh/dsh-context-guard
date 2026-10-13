@@ -61,12 +61,20 @@ test('语料：报错、断言、diff 增删行逐字保留', () => {
     const patterns = entry.kind === 'diff' ? [...MUST_KEEP, ...MUST_KEEP_DIFF] : MUST_KEEP
     const lines = reference.split('\n').filter((line) => patterns.some((re) => re.test(line)))
     for (const line of lines) {
-      const kept = plan.text.includes(line) || plan.text.includes(line.replace(/\s+/g, ' ').trim())
+      // 这一行本身可能是一条**已折叠**的记录（语料里就有 `… ×4` 这种历史标记）：
+      // 那种情况下它代表的多行原文没有逐字留在结果里，这是折叠的定义，不是丢信息。
+      const foldMark = /\u2026 \u00d7(\d+) \(/.exec(line)
+      const foldedAway = foldMark !== null && Number(foldMark[1]) >= 2
+      // 用**词序列**比较，不用逐字：规范化会动空白形状（`INFO  handled` → `INFO handled`），
+      // 那是形状不是内容。内容必须一个词都不少。
+      const words = line.replace(/\u2026 \u00d7\d+ \([^)]*\)/g, '').trim().split(/\s+/).filter(Boolean)
+      const outWords = new Set(plan.text.replace(/\u2026 \[\d+ more chars\]/g, '').split(/\s+/))
+      const kept = words.every((word) => outWords.has(word))
       const folded = plan.text.split('\n').some((candidate) => {
         const match = /×\d+ \(same/.exec(candidate)
         return match !== null && candidate.slice(0, match.index).trim() === line.trim()
       })
-      assert.ok(kept || folded, `${entry.id}: 丢了高信息量行 ${JSON.stringify(line)}`)
+      assert.ok(kept || folded || foldedAway, `${entry.id}: 丢了高信息量行 ${JSON.stringify(line)}`)
     }
   }
 })
