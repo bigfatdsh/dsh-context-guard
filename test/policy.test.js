@@ -73,10 +73,16 @@ test('compactJsonText 长数组换行但保留全部元素', () => {
   assert.ok(compacted.length < source.length)
 })
 
-test('budgetFor 用工具专属预算', () => {
-  assert.equal(budgetFor('read', {}, 1000), 16000)
+test('budgetFor 的优先级：单工具覆盖 > min(工具预设, 全局) > 预设 > 默认', () => {
+  // 单工具覆盖最优先
   assert.equal(budgetFor('read', { read: 555 }, 1000), 555)
+  // 用户显式设的全局值**必须**压过工具预设（否则配了等于没配）
+  assert.equal(budgetFor('read', {}, 1000), 1000)
+  assert.equal(budgetFor('bash', {}, 100000), 100000)
+  // 没有预设的工具直接用全局值
   assert.equal(budgetFor('unknown-tool', {}, 1000), 1000)
+  // 都没有就用默认
+  assert.equal(budgetFor('unknown-tool', {}, undefined), 1500)
 })
 
 test('planText 不会把文本变大', () => {
@@ -87,14 +93,14 @@ test('planText 不会把文本变大', () => {
     'diff --git a/a b/a\n--- a/a\n+++ b/a\n@@ -1 +1 @@\n-a\n+b\n',
   ]
   for (const sample of samples) {
-    const plan = planText(sample, { tool: 'bash', budgetChars: 100000, options: {} })
+    const plan = planText(sample, { tool: 'bash', budgetTokens: 25000, options: {} })
     assert.ok(plan.text.length <= sample.length, `变大了: ${JSON.stringify(sample.slice(0, 40))}`)
   }
 })
 
 test('planText 拒绝二进制并原样返回', () => {
   const binary = 'aaa\u0000bbb\u0000ccc'
-  const plan = planText(binary, { tool: 'bash', budgetChars: 100, options: {} })
+  const plan = planText(binary, { tool: 'bash', budgetTokens: 25, options: {} })
   assert.equal(plan.text, binary)
   assert.deepEqual(plan.steps, [])
 })
@@ -105,7 +111,7 @@ test('planText 在 read 上不做结构改写', () => {
     '-rw-r--r--  1 user  staff  2345 Oct  1 10:00 b.txt\n' +
     '-rw-r--r--  1 user  staff  3456 Oct  1 10:00 c.txt\n' +
     '-rw-r--r--  1 user  staff  4567 Oct  1 10:00 d.txt'
-  const plan = planText(listing, { tool: 'read', budgetChars: 100000, options: {} })
+  const plan = planText(listing, { tool: 'read', budgetTokens: 25000, options: {} })
   assert.ok(!plan.steps.includes('listing-columns'))
 })
 
@@ -122,7 +128,7 @@ test('optimizeContent 不碰富内容块', () => {
   const image = { type: 'image', data: 'AAAA', mediaType: 'image/png' }
   const result = optimizeContent(
     { tool: 'read', content: [image, { type: 'text', text: 'x'.repeat(2000) }] },
-    { budgetChars: 200 },
+    { budgetTokens: 50 },
   )
   assert.deepEqual(result.content[0], image)
 })
@@ -145,7 +151,7 @@ test('预算裁剪会保留报错行并标注省略', () => {
   const body = []
   for (let i = 0; i < 400; i += 1) body.push(`entry ${next()}${next()} key=${next()} payload ${next()}`)
   body[200] = 'ERROR: could not resolve dependency "left-pad"'
-  const plan = planText(body.join('\n'), { tool: 'bash', budgetChars: 900, options: {} })
+  const plan = planText(body.join('\n'), { tool: 'bash', budgetTokens: 225, options: {} })
   assert.ok(plan.steps.includes('budget'), `steps=${plan.steps.join(',')}`)
   assert.ok(plan.text.includes('ERROR: could not resolve dependency "left-pad"'))
   assert.match(plan.text, /lines omitted/)
@@ -154,6 +160,6 @@ test('预算裁剪会保留报错行并标注省略', () => {
 
 test('保守档只做规范化', () => {
   const payload = JSON.stringify({ a: 1, b: [1, 2] }, null, 4)
-  const plan = planText(payload, { tool: 'bash', budgetChars: 100000, options: { conservative: true } })
+  const plan = planText(payload, { tool: 'bash', budgetTokens: 25000, options: { conservative: true } })
   assert.ok(!plan.steps.includes('json-compact'))
 })
