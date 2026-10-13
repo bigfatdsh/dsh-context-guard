@@ -1,4 +1,4 @@
-# dsh-context-guard —— 输出前压缩 · DSH bundle 补丁。
+# dsh-meta-optimizer —— 输出前压缩 · DSH bundle 补丁。
 #
 # 只插入一行：把插件挂到 Host 根部。
 #
@@ -24,7 +24,7 @@
 
 - insert:
     - id: context-guard
-      name: 'dsh-context-guard'
+      name: 'dsh-meta-optimizer'
       config:
         enabled: true
         budgetTokens: 1500
