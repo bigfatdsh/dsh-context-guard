@@ -204,7 +204,8 @@ test('上游已经给定 content 时以上游为准', async () => {
 test('同一次调用第二次只给增量', async () => {
   const { ctx } = fakeCtx()
   const stats = new Stats()
-  const handler = createHandler(ctx, resolveConfig({ incremental: 'delta', incrementalMinChars: 200 }), stats)
+  // 预算给足：本用例测的是增量层，"又大又不重复"的内容本来就会被预算裁剪，那会干扰断言。
+  const handler = createHandler(ctx, resolveConfig({ incremental: 'delta', incrementalMinChars: 200, budgetTokens: 100000 }), stats)
   // 每行都必须逐字不同：只要两行能用"抹掉数字"折成同一模板，就会被日志折叠抢先压掉，
   // 那就测不到增量层了。这里用只含字母的句子做变动。
   const body = Array.from({ length: 160 }, (_, i) => `audit entry ${wordOf(i)} recorded by the scheduler`)
@@ -214,7 +215,8 @@ test('同一次调用第二次只给增量', async () => {
 
   // 每次都必须新建结果对象：处理器按对象身份做幂等，复用对象会被（正确地）跳过。
   const one = await run(handler, exec, result(fileText), { kind: 'accept' })
-  assert.equal(one.content, undefined, '逐行都不同的内容本来就压不动，应当透传')
+  // 每行都不同、预算又给足：没有可折的重复，也没有超预算，应当原样透传。
+  assert.equal(one.content, undefined, '逐行不同且未超预算的内容应当透传')
 
   const two = await run(handler, exec, result(grown), { kind: 'accept' })
   assert.ok(two.content !== undefined, '第二次应当走增量')
