@@ -3,7 +3,7 @@
  *
  * 只看两个数：省了多少、有多少条结果真的丢了信息（按 informationIndex 判，不看形状）。
  *
- * @module dsh-context-guard/tools/sweep-budget
+ * @module dsh-meta-optimizer/tools/sweep-budget
  */
 
 import { readFileSync, readdirSync } from 'node:fs'
