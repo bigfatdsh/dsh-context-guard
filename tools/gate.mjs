@@ -4,7 +4,7 @@
  * 用真实语料算"每条内容压得动多少"，再看不同门槛会放行几条、整体省多少。
  * 结论用来定 `minSavingRatio` 的默认值。
  *
- * @module dsh-context-guard/tools/gate
+ * @module dsh-meta-optimizer/tools/gate
  */
 
 import { corpus } from './corpus.mjs'
