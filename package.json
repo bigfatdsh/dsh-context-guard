@@ -1,6 +1,6 @@
 {
   "name": "dsh-meta-optimizer",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -43,7 +43,8 @@
     "bench": "node tools/bench.mjs",
     "bench:json": "node tools/bench.mjs --json",
     "bench:real": "node tools/real-corpus.mjs",
-    "eval": "node tools/evaluate.mjs"
+    "eval": "node tools/evaluate.mjs",
+    "session-cost": "node tools/session-cost.mjs"
   },
   "engines": {
     "node": "^22.19 || >=24"
