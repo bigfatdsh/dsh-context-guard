@@ -106,7 +106,7 @@ Electron 宿主吞掉插件 stderr，这是桌面端唯一能确认"插件到底
   不把图片等富内容算进分母。
 - **跨调用增量**：同一"工具名 + 参数"的输出第二次出现时，给"没变"或"变了哪几行"。
 - **配置**：Standard Schema v1 校验，未知键点名报错，校验失败退回全默认。
-- **诊断**：装了 `webServer` 时挂只读 `/dsh-context-guard/stats`。
+- **诊断**：装了 `webServer` 时挂只读 `/dsh-meta-optimizer/stats`。
 
 
 ### 净收益闸门按实测重定（400 / 12% → 200 / 3%）
