@@ -5,7 +5,7 @@
  * unified diff 的 hunk 结构、`ls -l` 的固定列、日志的时间戳 + 级别、JSON 的缩进阶梯）。
  * 压不动的语料也该造出来，否则基准会虚高。
  *
- * @module dsh-context-guard/tools/corpus
+ * @module dsh-meta-optimizer/tools/corpus
  */
 
 import { readFileSync, readdirSync } from 'node:fs'
@@ -74,7 +74,7 @@ function appLog(lines) {
 
 /** 造一段构建/测试产出。 */
 function buildOutput() {
-  const out = ['> dsh-context-guard@1.0.0 test', '> node --test "test/*.test.js"', '']
+  const out = ['> dsh-meta-optimizer@1.0.0 test', '> node --test "test/*.test.js"', '']
   for (let i = 0; i < 40; i += 1) out.push(`Compiling src/module${i}.js`)
   for (let i = 0; i < 30; i += 1) out.push(`ok ${i + 1} - 用例 ${i + 1}`)
   out.push('')
