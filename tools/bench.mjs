@@ -12,7 +12,7 @@
  * 3. `NO OVER-CLAIM` —— 标记里声明的省略行数**不得超过**实际少掉的行数。
  *    （少报是允许的：JSON 压行这类纯排版压缩不涉及内容省略，不该写标记。）
  *
- * @module dsh-context-guard/tools/bench
+ * @module dsh-meta-optimizer/tools/bench
  */
 
 import { corpus } from './corpus.mjs'
