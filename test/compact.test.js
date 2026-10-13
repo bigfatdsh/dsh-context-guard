@@ -3,7 +3,7 @@
  *
  * 重点不在"压得狠"，而在**压得对**：每个用例都断言"该保留的一个都没少"。
  *
- * @module dsh-context-guard/test/compact
+ * @module dsh-meta-optimizer/test/compact
  */
 
 import { strict as assert } from 'node:assert'
