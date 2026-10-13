@@ -3,7 +3,7 @@
  *
  * 输出一行 JSON（避免展示层把重复行折叠），由调用方解析。
  *
- * @module dsh-context-guard/tools/evaluate
+ * @module dsh-meta-optimizer/tools/evaluate
  */
 
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
