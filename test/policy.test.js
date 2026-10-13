@@ -34,7 +34,8 @@ test('selectWithinBudget 保住头尾并标出省略行数', () => {
   assert.ok(out.dropped > 0)
   const settled = renderUnits(out.list, renderMarker).split('\n')
   assert.equal(settled[0], input[0])
-  assert.equal(settled[settled.length - 1], input[199])
+  // 末行**必须还在**：它自己太长时允许被截断（截断不是丢信息），但不许消失。
+  assert.ok(settled[settled.length - 1].startsWith('line 199 '), '末行消失了')
   assert.ok(settled.some((line) => /omitted/.test(line)))
   // 承诺：省下的行数必须写在标记里，且不能比实际少掉的多。
   const declared = settled.reduce((sum, line) => {
