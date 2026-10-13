@@ -1,4 +1,4 @@
-# dsh-context-guard
+# dsh-meta-optimizer
 
 **Compress before it lands.** Every tool result passes one more gate *before* it is written into
 context: content-aware structural compression, cross-call deltas, and information-weighted fitting
@@ -136,7 +136,7 @@ node tools/bench.mjs --json
 # 1) add the plugin to a profile's dependencies (link: to this checkout)
 cd <DSH_HOME>/profiles/<profile>
 #    add to package.json dependencies:
-#      "dsh-context-guard": "link:/absolute/path/dsh-context-guard"
+#      "dsh-meta-optimizer": "link:/absolute/path/dsh-meta-optimizer"
 pnpm install
 
 # 2) restart that profile (DSH Desktop: restart the app; plugin rows load at startup)
@@ -148,7 +148,7 @@ automatically. You can also write it yourself:
 ```yaml
 - insert:
     - id: context-guard
-      name: 'dsh-context-guard'
+      name: 'dsh-meta-optimizer'
       config:
         enabled: true
         incremental: delta
@@ -190,7 +190,7 @@ Per-tool default budgets: `read` 16000, `web_fetch` 14000, `bash`/`task`/`workfl
 10000, `grep`/`web_search` 8000, `glob`/`list` 6000. `read` / `write` / `edit` are treated as
 high-risk content: normalization, dedup and budget only — no structural rewrites.
 
-When a `webServer` service is present, a read-only `/dsh-context-guard/stats` endpoint reports
+When a `webServer` service is present, a read-only `/dsh-meta-optimizer/stats` endpoint reports
 counters (results seen, changed, delta hits, rollbacks, estimated tokens saved, per-step and per-kind
 hits). It never returns result content.
 
